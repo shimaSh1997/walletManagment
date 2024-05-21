@@ -56,7 +56,7 @@ exports.confirmDeposit = async (req, res, next) => {
   // console.log("log transaction:", transactionId);
   try {
     const transaction = await Transaction.findOne({
-      where: { id: req.params.id },
+      where: { id: transactionId },
     });
     if (
       (!transaction || transaction.dataValues.transactionType !== "deposit",
@@ -74,7 +74,10 @@ exports.confirmDeposit = async (req, res, next) => {
           { balance: balance + amount },
           { where: { id: transaction.dataValues.id } }
         );
-        // await Transaction.update({ transaction.status }, { where: { id: user.id } })
+        // console.log("user: ", user)
+        // const status = transaction.dataValues.status
+        // await Transaction.update({ status: 'confirmed' }, { where: { id: transactionId} })
+        // .catch(err => { console.log("Errrr:", err) })
         return res
           .status(200)
           .json({ message: "deposit has been confirmed" });
