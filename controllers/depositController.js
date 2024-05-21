@@ -3,11 +3,10 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin");
-const multer = require("multer");
 const path = require("path");
 const Transaction = require("../models/Transaction.js");
-const { userInfo } = require("os");
-const { where } = require("sequelize");
+const multer = require("multer");
+
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
@@ -19,15 +18,21 @@ const storage = multer.diskStorage({
   },
 });
 
-exports.upload = multer({ storage });
+exports.upload_deposit = multer({ storage });
 
 exports.initiateDeposit = async (req, res, next) => {
-  const userId = req.body.userId;
+  // Validate the request body
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors })
+  }
+  const userId = req.userId;
+  console.log("userrrr id: ",userId)
   const amount = req.body.amount;
   const accountId = req.body.accountId;
-  console.log("req file:", req.file);
+  // console.log("req file:", req.file);
   const receiptPath = req.file ? req.file.path : null;
-  //   console.log("receipt:",req.file.path)
+  console.log("receipt:", req.file.path)
 
   const transaction = await Transaction.create({
     userId,
@@ -39,6 +44,7 @@ exports.initiateDeposit = async (req, res, next) => {
   }).catch((err) => {
     console.log("Error occurred: ", err);
   });
+  console.log("in initiat deposit::: ", transaction)
   res
     .status(201)
     .json({ message: "initiate Deposit has been successful", transaction });
@@ -54,7 +60,7 @@ exports.confirmDeposit = async (req, res, next) => {
     });
     if (
       (!transaction || transaction.dataValues.transactionType !== "deposit",
-      transaction?.dataValues.status !== "accepted")
+        transaction?.dataValues.status !== "pending")
     ) {
       return res.status(401).json({ message: "Deposit not found" });
     }

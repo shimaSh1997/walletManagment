@@ -7,10 +7,10 @@ exports.verifyToken = (req, res, next) => {
   }
   jwt.verify(tokenBarear, "your_secret_key", (err, decoded) => {
     if (err) {
-      console.log('errrr:',err)
+      console.log('log error:',err)
       return res.status(401).json({ message: "Failed to authenticate token" });
     }
-    // req.userId = decoded.userId;
+    req.userId = decoded.userId;
     next();
   });
 };

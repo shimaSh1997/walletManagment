@@ -13,27 +13,35 @@ exports.signUp = async (req, res, next) => {
   const username = req.body.username;
   const email = req.body.email;
   const password = req.body.password;
-  if (email) {
-    try {
-      const user = await User.findAll({ where: { email: email } });
-      if (user.length > 0) {
-        return res.status(400).json({ message: "User Exist " });
-      }
-      const hashedPassword = await bcrypt.hash(password, 10);
-      User.create({
-        username: username,
-        email: email,
-        password: hashedPassword,
-        isAdmin: false,
-      });
-      res.status(201).json({ message: "User successfully created" });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
   }
-};
+  try {
+    // Check if user already exists
+    const user = await User.findOne({ where: { email: email } });
+    if (user) {
+      return res.status(400).json({ message: "User already Exist " });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    User.create({
+      username: username,
+      email: email,
+      password: hashedPassword,
+      // isAdmin: false,
+    });
+    res.status(201).json({ message: "User successfully created" });
+  } catch (error) {
+    // res.status(500).json({ error: error.message });
+    next(error) // Pass errors to the error handling middleware
+  }
+}
 
 exports.login = (req, res, next) => {
+  // Validate the request body
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors })
+  }
   const username = req.body.username;
   const password = req.body.password;
   try {
@@ -52,17 +60,20 @@ exports.login = (req, res, next) => {
               .json({ message: "Invalid username or passwords" });
           }
         });
-      const token = jwt.sign({ userId: user.dataValues.id }, "your_secret_key");
+      const token = generateToken(user.id)
       res.json({ token });
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error)
+    // res.status(500).json({ error: error.message });
   }
 };
+
 const generateToken = (userId) => {
-  const token = jwt.sign({ userId }, "your_secret_key", { expiresIn: "1h" });
+  const token = jwt.sign({ userId }, "your_secret_key", { expiresIn: "4h" });
   return token;
 };
+
 const sendToken = async (userId, email) => {
   const token = generateToken(userId);
   const expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
@@ -82,9 +93,17 @@ exports.forget_password = async (req, res, next) => {
     .json({ token: token, message: "Token sent successfully." });
 };
 exports.reset_password = async (req, res, next) => {
+  // Validate the request body
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors })
+  }
   const email = req.body.email;
   const token = req.body.token;
   const newPassword = req.body.password;
+  if (!email || !token || !newPassword) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
 
   const user = await User.findOne({ where: { email: email } });
   // console.log("user: ",user)
@@ -101,21 +120,30 @@ exports.reset_password = async (req, res, next) => {
   if (!resetToken) {
     res.status(400).json({ message: "Invalid or expired token" });
   }
-  await user.update({ password: newPassword });
+  // hash the new password 
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  await user.update({ password: hashedPassword });
   // await user.destroy(resetToken);
   return res.status(200).json({ message: "Password reset successful." });
 };
+// get /getWalletBalance
 exports.getBalance = async (req, res, next) => {
-  const userId = req.body.userId
-
-  await User.findOne({ where: userId })
-    .then(result => {
-      if(!result){
-        return res.status(404).json({ message: "User not found." });
-      }
-      res.json({message:"get balance from user successfully", result})
-    })
-    .catch((err) => {
-      console.log("Error get balance: ", err);
-    });
+  // const userId = req.body.userId
+  const userId = req.userId
+  try {
+    await User.findOne({ where: userId })
+      .then(result => {
+        if (!result) {
+          return res.status(404).json({ message: "User not found." });
+        }
+        // console.log("loggg:" , result)
+        const balance = result.dataValues.balance
+        res.json({ message: "Balance retrieved successfully", balance })
+      })
+      .catch((err) => {
+        console.log("Error get balance: ", err);
+      });
+  } catch (error) {
+    next(error)
+  }
 };
