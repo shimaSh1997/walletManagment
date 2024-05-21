@@ -27,7 +27,7 @@ exports.initiateDeposit = async (req, res, next) => {
     return res.status(422).json({ errors: errors })
   }
   const userId = req.userId;
-  console.log("userrrr id: ",userId)
+  // console.log("userrrr id: ",userId)
   const amount = req.body.amount;
   const accountId = req.body.accountId;
   // console.log("req file:", req.file);
@@ -65,28 +65,20 @@ exports.confirmDeposit = async (req, res, next) => {
       return res.status(401).json({ message: "Deposit not found" });
     }
     const amount = transaction.dataValues.amount;
-    const transactionType = transaction.dataValues.transactionType;
+    // const transactionType = transaction.dataValues.transactionType;
     // res.status(200).json({message:"test transaction" , transaction})
     await User.findOne({ where: { id: transaction.dataValues.id } }).then(
       async (user) => {
         const balance = user?.dataValues.balance;
-        if (transactionType == "deposit") {
-          await User.update(
-            { balance: balance + amount },
-            { where: { id: transaction.dataValues.id } }
-          );
-          return res
-            .status(200)
-            .json({ message: "deposit has been confirmed" });
-        } else if (transactionType == "withdraw") {
-          await User.update(
-            { balance: balance - amount },
-            { where: { id: transaction.dataValues.id } }
-          );
-          return res
-            .status(200)
-            .json({ message: "withdraw has been confirmed" });
-        }
+        await User.update(
+          { balance: balance + amount },
+          { where: { id: transaction.dataValues.id } }
+        );
+        // await Transaction.update({ transaction.status }, { where: { id: user.id } })
+        return res
+          .status(200)
+          .json({ message: "deposit has been confirmed" });
+
       }
     );
   } catch (err) {
