@@ -12,7 +12,7 @@ const router = express.Router();
 
 // router for create admin if not any Exist in database
 router.post("/admin_initialization", adminAuthController.adminInitiate)
-// User routes for login
+// Login admin
 router.post("/login", adminAuthController.postLogin);
 
 // createAdmin route
