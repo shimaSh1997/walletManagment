@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 const multer = require("multer");
+const { ENUM } = require("sequelize");
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
@@ -22,7 +23,7 @@ exports.initiateDeposit = async (req, res, next) => {
     return res.status(422).json({ errors: errors });
   }
   const userId = req.userId;
-  // console.log("userrrr id: ",userId)
+  console.log("userrrr id: ", userId);
   const amount = req.body.amount;
   const accountId = req.body.accountId;
   // console.log("req file:", req.file);
@@ -60,6 +61,7 @@ exports.confirmDeposit = async (req, res, next) => {
       return res.status(401).json({ message: "Deposit not found" });
     }
     const amount = transaction.dataValues.amount;
+    const status = transaction.dataValues.status;
     // const transactionType = transaction.dataValues.transactionType;
     // res.status(200).json({message:"test transaction" , transaction})
     await User.findOne({ where: { id: transaction.dataValues.id } }).then(
@@ -69,10 +71,10 @@ exports.confirmDeposit = async (req, res, next) => {
           { balance: balance + amount },
           { where: { id: transaction.dataValues.id } }
         );
-        // console.log("user: ", user)
-        // const status = transaction.dataValues.status
-        // await Transaction.update({ status: 'confirmed' }, { where: { id: transactionId} })
-        // .catch(err => { console.log("Errrr:", err) })
+        await Transaction.update(
+          { status: "accepted" },
+          { where: { id: transactionId } }
+        );
         return res.status(200).json({ message: "deposit has been confirmed" });
       }
     );
