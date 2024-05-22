@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "3b614b70-4103-4ee2-b435-635589dd4c9a",
+		"_postman_id": "b036f26c-b5de-4fca-acc3-4d1f1e64abc7",
 		"name": "walletManagment",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "34717478"
@@ -236,8 +236,39 @@
 				{
 					"name": "createAdmin",
 					"request": {
-						"method": "GET",
-						"header": []
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlzQWRtaW4iOnRydWUsImlhdCI6MTcxNjM2MDk5Nn0.phw7G16tYSeCQI9fJIQiup-pkk7XhuiDD8UYCvMNN8Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"admin1@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/admin/createAdmin",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"admin",
+								"createAdmin"
+							]
+						}
 					},
 					"response": []
 				},
@@ -249,7 +280,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTcxNjI5NDc4NywiZXhwIjoxNzE2MzA5MTg3fQ.HCfBbc0H5qy-aFBcV5BpyiJ6yJWo5MSqWqsG-644GcM",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcxNjM2Mzk5NCwiZXhwIjoxNzE2Mzc4Mzk0fQ.ObM6KP8IWkwogiQFtNp1QfzVGjHvA7lkQTlpHNPB4aA",
 									"type": "string"
 								}
 							]
@@ -260,22 +291,22 @@
 							"mode": "formdata",
 							"formdata": [
 								{
+									"key": "userId",
+									"value": "1",
+									"type": "text"
+								},
+								{
 									"key": "amount",
 									"value": "35",
 									"type": "text"
 								},
 								{
-									"key": "accountId",
-									"value": "1",
-									"type": "text"
-								},
-								{
-									"key": "receiptPath",
+									"key": "receipt",
 									"type": "file",
-									"src": "postman-cloud:///1ef176f8-51cc-4a80-b6bb-6857ca8409b6"
+									"src": "postman-cloud:///1ef18123-c409-4c80-ae62-fa69d86010e4"
 								},
 								{
-									"key": "id",
+									"key": "accountId",
 									"value": "1",
 									"type": "text"
 								}
@@ -327,7 +358,10 @@
 					"name": "adminWithdraw",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": ""
+						}
 					},
 					"response": []
 				},
@@ -335,7 +369,10 @@
 					"name": "confirmWithdraw",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": ""
+						}
 					},
 					"response": []
 				},
